@@ -1,0 +1,52 @@
+package com.example.user_service.controller;
+
+import com.example.user_service.dto.UserDto;
+import com.example.user_service.service.UserService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v1/user")
+public class UserController {
+
+    private final UserService userService;
+
+    public UserController(UserService userService){
+        this.userService = userService;
+    }
+
+    @PostMapping
+    public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto){
+        UserDto create = userService.createUser(userDto);
+        return new ResponseEntity<>(create, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> findUserById(@PathVariable("id") Long id){
+        UserDto user = userService.findUserById(id);
+        if(user == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateUser(@PathVariable Long id,@RequestBody UserDto userDto){
+        try{
+            userService.updateUser(id,userDto);
+            return ResponseEntity.ok("User has Updated Successfully");
+        }catch (IllegalArgumentException e){
+            return new ResponseEntity<>("User Not Found",HttpStatus.NOT_FOUND);
+        }
+    }
+
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
+        try{
+            userService.deleteUser(id);
+            return ResponseEntity.noContent().build();
+        }catch (IllegalArgumentException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+}
